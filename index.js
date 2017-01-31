@@ -2,10 +2,14 @@
 
 /*jslint es5: true */
 
-const initial_task_js_content = "module.exports = {\r\n\
+const initial_task_js_content = "/*jslint es5: true */\
+\
+var cl = require(\"unibuild\").cl;\
+\
+module.exports = {\r\n\
     arguments: function (args) {\r\n\
         for(var i = 0; i<args.length; i++) {\r\n\
-            console.log(args[i]);\r\n\
+            cl(args[i]);\r\n\
         }\r\n\
     }\r\n\
 };\r\n";
@@ -23,6 +27,11 @@ function isFunction(functionToCheck) {
     return functionToCheck && getType.toString.call(functionToCheck) === '[object Function]';
 }
 
+function cl(args) {
+    console.log(args);
+}
+module.exports.cl = cl;
+
 var fs = require('fs');
 
 (function () {
@@ -37,7 +46,7 @@ var fs = require('fs');
     if (fs.existsSync(packageJsonPath)) {
         packageData = readJsonFile(packageJsonPath)
     } else {
-        console.log("Install unibuild to the another project as dependency so it will analyse projects package.json")
+        cl("Install unibuild to the another project as dependency so it will analyse projects package.json")
         process.exit(2);
     }
 
@@ -45,9 +54,9 @@ var fs = require('fs');
     var taskJsPath = path.join(taskJsDir, 'tasks.js');
 
     if (!fs.existsSync(taskJsPath)) {
-        console.log("tasks.js doesn't exist.")
-        console.log(initial_task_js_content);
-        console.log("Would you like to create one with the following content? (y)")
+        cl("tasks.js doesn't exist.")
+        cl(initial_task_js_content);
+        cl("Would you like to create one with the following content? (y)")
 
         process.stdin.setRawMode(true);
         process.stdin.on('data', function (key) {
@@ -55,10 +64,10 @@ var fs = require('fs');
                 if (!fs.existsSync(taskJsDir)) {
                     fs.mkdirSync(taskJsDir);
                 }
-                console.log("creating tasks.js");
+                cl("creating tasks.js");
                 fs.writeFile(taskJsPath, initial_task_js_content, (err) => {
                     if (err) throw err;
-                    console.log("task.js is created. Restart unibuild command.")
+                    cl("task.js is created. Restart unibuild command.")
                     process.exit(0);
                 })
             } else {
@@ -91,7 +100,7 @@ var fs = require('fs');
             var name;
             for (name in obj) {
                 if (obj.hasOwnProperty(name)) {
-                    console.log("\t" + name);
+                    cl("\t" + name);
                 }
             }
         }
@@ -100,10 +109,10 @@ var fs = require('fs');
             var stepName = argv._[0];
             var step = module[stepName] ? module[stepName] : routines[stepName];
             if (step) {
-                step(argv._.slice(1));
-                console.log("Finished!");
+                step(process.argv.slice(3));
+                cl("Finished!");
             } else {
-                console.log(`Step ${stepName} doesn't exist in .build/task.js`);
+                cl(`Step ${stepName} doesn't exist in .build/task.js`);
                 process.exit(3);
             }
         }
@@ -116,31 +125,46 @@ var fs = require('fs');
             var self = {};
 
             self.help = function () {
-                console.log("Syntax: <npm run> [<package>] [<package command>]")
-                console.log("\tor <npm run> [<command>]")
+                cl("Syntax: <npm run> [<package>] [<package command>]")
+                cl("\tor <npm run> [<command>]")
                 module.commands(function () {
                     module.packages(function () {
-                        console.log("Sample: nmp run server build")
+                        cl("Sample: nmp run server build")
                     });
                 });
             };
 
             self.packages = function (callback) {
-                console.log("Available packages: ")
+                cl("Available packages: ")
                 var newHash = cutHash(packageData.scripts, isPackage);
                 printNamesFromHash(newHash);
-                console.log("")
+                cl("")
                 if (callback && isFunction(callback)) callback(newHash);
             };
 
             self.commands = function (callback) {
-                console.log("Available commands: ");
+                cl("Available commands: ");
                 var newHash = cutHash(packageData.scripts, isCommand);
                 printNamesFromHash(newHash);
-                console.log("")
-                console.log("To add more commands use .build/tasks.js")
+                cl("")
+                cl("To add more commands use .build/tasks.js")
                 if (callback && isFunction(callback)) callback(newHash);
             };
+
+            self.openUrl = function (url) {
+                require("openurl").open(url);
+            }
+
+            self.mailTo = function (args) {
+                var mailArgs = require('minimist')(args);
+                cl(mailArgs);
+                if (!mailArgs._) {
+                    cl("mailTo <email1> [<email2>] -s <Subject> -b <Body>");
+                    process.exit(1);
+                }
+                require("openurl").mailto(mailArgs._,
+                    { subject: mailArgs.s, body: mailArgs.b });
+            }
 
             return self;
         })();
@@ -149,13 +173,13 @@ var fs = require('fs');
             if (isPackage(packageData.scripts, argv._[0])) {
                 var fork = require('child_process').fork;
                 var child = fork('./script', process.argv.slice(4));
-                child.on('exit', function (code) { console.log('Child process exited with exit code ' + code); });
+                child.on('exit', function (code) { cl('Child process exited with exit code ' + code); });
             }
 
             runCommandWithArguments();
         } else {
             module.help(function () {
-                console.log("No command or package specified. Better use this tool from the package.json on top");
+                cl("No command or package specified. Better use this tool from the package.json on top");
                 process.exit(1);
             });
         }

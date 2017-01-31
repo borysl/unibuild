@@ -8,6 +8,8 @@ const initial_task_js_content = "module.exports = {\r\n\
     }\r\n\
 };\r\n";
 
+const unibuild_command = 'node_modules/unibuild/index.js'
+
 function readJsonFile(filename) {
     var strData = fs.readFileSync(filename, 'utf8')
     var obj = JSON.parse(strData);
@@ -109,9 +111,9 @@ var fs = require('fs');
             runFurtherSteps();
         }
 
-        function isPackage(arr, name) { if (arr[name] && !arr[name].contains("node .build\\build.js") && arr[name].contains(".build\\build.js")) { return true; } }
+        function isPackage(arr, name) { if (arr[name] && !arr[name].contains(`node ${unibuild_command}`) && arr[name].contains(unibuild_command)) { return true; } }
 
-        function isCommand(arr, name) { if (arr[name] && arr[name].contains("node .build\\build.js")) { return true; } }
+        function isCommand(arr, name) { if (arr[name] && arr[name].contains(`node ${unibuild_command}`)) { return true; } }
 
         var module = (function () {
             var self = {};

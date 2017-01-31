@@ -1,6 +1,6 @@
 {
   "name": "unibuild",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Build routines common for any development environment",
   "main": "index.js",
   "scripts": {

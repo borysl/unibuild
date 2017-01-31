@@ -102,6 +102,9 @@ var fs = require('fs');
             if (step) {
                 step(argv._.slice(1));
                 console.log("Finished!");
+            } else {
+                console.log(`Step ${stepName} doesn't exist in .build/task.js`);
+                process.exit(3);
             }
         }
 

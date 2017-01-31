@@ -1,0 +1,28 @@
+{
+  "name": "unibuild",
+  "version": "0.1.0",
+  "description": "Build routines common for any development environment",
+  "main": "index.js",
+  "scripts": {
+    "test": "node index.js commands"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/borysl/unibuild.git"
+  },
+  "keywords": [
+    "build",
+    "npm",
+    "automation",
+    "ci"
+  ],
+  "author": "Borys Lebeda",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/borysl/unibuild/issues"
+  },
+  "homepage": "https://github.com/borysl/unibuild#readme",
+  "dependencies": {
+    "minimist": "^1.2.0"
+  }
+}

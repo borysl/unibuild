@@ -3,8 +3,10 @@
 /*jslint es5: true */
 
 const initial_task_js_content = "module.exports = {\r\n\
-    psr: function (callback) {\r\n\
-        \r\n\
+    arguments: function (args) {\r\n\
+        for(var i = 0; i<args.length; i++) {\r\n\
+            console.log(args[i]);\r\n\
+        }\r\n\
     }\r\n\
 };\r\n";
 
@@ -14,6 +16,11 @@ function readJsonFile(filename) {
     var strData = fs.readFileSync(filename, 'utf8')
     var obj = JSON.parse(strData);
     return obj;
+}
+
+function isFunction(functionToCheck) {
+    var getType = {};
+    return functionToCheck && getType.toString.call(functionToCheck) === '[object Function]';
 }
 
 var fs = require('fs');
@@ -89,26 +96,13 @@ var fs = require('fs');
             }
         }
 
-        function runStepsOneByOne() {
-            var i = 0;
-
-            function runFurtherSteps() {
-                var stepName = argv._[i];
-                var step;
-                if (i < argv._.length) {
-                    step = module[stepName] ? module[stepName] : routines[stepName];
-                } else {
-                    step = function () {
-                        console.log("Finished!");
-                    };
-                }
-
-                i++;
-
-                step(runFurtherSteps);
+        function runCommandWithArguments() {
+            var stepName = argv._[0];
+            var step = module[stepName] ? module[stepName] : routines[stepName];
+            if (step) {
+                step(argv._.slice(1));
+                console.log("Finished!");
             }
-
-            runFurtherSteps();
         }
 
         function isPackage(arr, name) { if (arr[name] && !arr[name].contains(`node ${unibuild_command}`) && arr[name].contains(unibuild_command)) { return true; } }
@@ -118,13 +112,12 @@ var fs = require('fs');
         var module = (function () {
             var self = {};
 
-            self.help = function (callback) {
+            self.help = function () {
                 console.log("Syntax: <npm run> [<package>] [<package command>]")
                 console.log("\tor <npm run> [<command>]")
                 module.commands(function () {
                     module.packages(function () {
                         console.log("Sample: nmp run server build")
-                        if (callback) { callback(); }
                     });
                 });
             };
@@ -134,7 +127,7 @@ var fs = require('fs');
                 var newHash = cutHash(packageData.scripts, isPackage);
                 printNamesFromHash(newHash);
                 console.log("")
-                callback(newHash);
+                if (callback && isFunction(callback)) callback(newHash);
             };
 
             self.commands = function (callback) {
@@ -143,7 +136,7 @@ var fs = require('fs');
                 printNamesFromHash(newHash);
                 console.log("")
                 console.log("To add more commands use .build/tasks.js")
-                callback(newHash);
+                if (callback && isFunction(callback)) callback(newHash);
             };
 
             return self;
@@ -156,7 +149,7 @@ var fs = require('fs');
                 child.on('exit', function (code) { console.log('Child process exited with exit code ' + code); });
             }
 
-            runStepsOneByOne();
+            runCommandWithArguments();
         } else {
             module.help(function () {
                 console.log("No command or package specified. Better use this tool from the package.json on top");

@@ -2,17 +2,17 @@
 
 /*jslint es5: true */
 
-const initial_task_js_content = "/*jslint es5: true */\
-\
-var cl = require(\"unibuild\").cl;\
-\
-module.exports = {\r\n\
-    arguments: function (args) {\r\n\
-        for(var i = 0; i<args.length; i++) {\r\n\
-            cl(args[i]);\r\n\
-        }\r\n\
-    }\r\n\
-};\r\n";
+const initial_task_js_content = "/*jslint es5: true */\n\
+\n\
+var cl = require(\"unibuild\").cl;\n\
+\n\
+module.exports = {\n\
+    arguments: function (args) {\n\
+        for(var i = 0; i<args.length; i++) {\n\
+            cl(args[i]);\n\
+        }\n\
+    }\n\
+};\n";
 
 const unibuild_command = 'node_modules/unibuild/index.js'
 

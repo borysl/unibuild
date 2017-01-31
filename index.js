@@ -5,10 +5,32 @@
 (function(){
     'use strict';
     var argv = require('minimist')(process.argv.slice(2)),
-    routines = require('./tasks'),
+    routines,
      fs = require('fs'),
-     packageData = readJsonFile(__dirname + '\\..\\package.json'),
+     packageData,
+     packageJsonPath,
      path = require('path');
+
+     packageJsonPath = __dirname + '/../package.json';
+     if (fs.existsSync(packageJsonPath)) {
+        packageData = readJsonFile(packageJsonPath)
+     } else {
+         console.log("Install unibuild to the another project as dependency so it will analyse projects package.json")
+         process.exit(2);
+     }
+
+
+     if (fs.existsSync('tasks.js')) {
+        routines = require('./tasks')
+     } else {
+         console.log("tasks.js doesn't exist. Please create one with following content")
+         console.log("module.exports = {\r\n\
+    psr: function (callback) {\r\n\
+        \r\n\
+    }\r\n\
+};\r\n");
+         process.exit(1);
+     }
 
     Array.prototype.contains = function(element){
         return this.indexOf(element) > -1;

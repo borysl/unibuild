@@ -23,8 +23,7 @@ function readJsonFile(filename) {
 }
 
 function isFunction(functionToCheck) {
-    var getType = {};
-    return functionToCheck && getType.toString.call(functionToCheck) === '[object Function]';
+    return {}.toString.call(functionToCheck) === '[object Function]';
 }
 
 function cl(args) {
@@ -37,7 +36,6 @@ var fs = require('fs');
 (function () {
     'use strict';
     var argv = require('minimist')(process.argv.slice(2)),
-        routines,
         packageData,
         packageJsonPath,
         path = require('path');
@@ -75,8 +73,6 @@ var fs = require('fs');
             }
         });
     } else {
-        routines = require(taskJsPath)
-
         Array.prototype.contains = function (element) {
             return this.indexOf(element) > -1;
         };
@@ -105,16 +101,23 @@ var fs = require('fs');
             }
         }
 
-        function runCommandWithArguments() {
-            var stepName = argv._[0];
+        function runStep(stepName, stepArgs, taskJsPathLocal) {
+            var effectivePath = taskJsPathLocal ? taskJsPathLocal : taskJsPath;
+            var routines = require(effectivePath);
             var step = module[stepName] ? module[stepName] : routines[stepName];
             if (step) {
-                step(process.argv.slice(3));
+                step(stepArgs);
                 cl("Finished!");
             } else {
-                cl(`Step ${stepName} doesn't exist in .build/task.js`);
+                cl(`Step ${stepName} doesn't exist in ${taskJsPath}`);
                 process.exit(3);
             }
+        }
+
+        function runCommandWithArguments() {
+            var stepName = argv._[0];
+            var stepArgs = process.argv.slice(3);
+            runStep(stepName, stepArgs);
         }
 
         function isPackage(arr, name) { if (arr[name] && !arr[name].contains(`node ${unibuild_command}`) && arr[name].contains(unibuild_command)) { return true; } }
@@ -139,16 +142,25 @@ var fs = require('fs');
                 var newHash = cutHash(packageData.scripts, isPackage);
                 printNamesFromHash(newHash);
                 cl("")
-                if (callback && isFunction(callback)) callback(newHash);
             };
 
-            self.commands = function (callback) {
-                cl("Available commands: ");
-                var newHash = cutHash(packageData.scripts, isCommand);
-                printNamesFromHash(newHash);
-                cl("")
-                cl("To add more commands use .build/tasks.js")
-                if (callback && isFunction(callback)) callback(newHash);
+            self.commands = function (args, callback) {
+                if (args.length == 0) {
+                    cl("Available commands: ");
+                    var newHash = cutHash(packageData.scripts, isCommand);
+                    printNamesFromHash(newHash);
+                    cl("")
+                    cl("To add more commands use .build/tasks.js")
+                    if (callback && isFunction(callback)) callback(newHash);
+                }
+                else {
+                    var newTaskJson = path.join(process.argv[1], '../../../.build/tasks.js');
+                    cl(`Calling ${args[0]} with arguments ${args.slice(1)} in ${newTaskJson}`);
+                    var stepName = args[0];
+                    var stepArgs = args.slice(1);
+                    runStep(stepName, stepArgs, newTaskJson);
+                    if (callback && isFunction(callback)) callback(newHash);
+                }
             };
 
             self.openUrl = function (url) {

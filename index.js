@@ -120,9 +120,9 @@ var fs = require('fs');
             runStep(stepName, stepArgs);
         }
 
-        function isPackage(arr, name) { if (arr[name] && !arr[name].contains(`node ${unibuild_command}`) && arr[name].contains(unibuild_command)) { return true; } }
+        function isPackage(arr, name) { if (arr[name] && !arr[name].includes(`node ${unibuild_command}`) && arr[name].includes('unibuild_command')) { return true; } }
 
-        function isCommand(arr, name) { if (arr[name] && arr[name].contains(`node ${unibuild_command}`)) { return true; } }
+        function isCommand(arr, name) { if (arr[name] && arr[name].includes(`node ${unibuild_command}`)) { return true; } }
 
         var module = (function () {
             var self = {};

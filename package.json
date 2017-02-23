@@ -1,8 +1,11 @@
 {
   "name": "unibuild",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Build routines common for any development environment",
   "main": "index.js",
+  "bin": {
+    "unibuild": "./.bin/unibuild"
+  },
   "scripts": {
     "test": "node index.js commands"
   },
